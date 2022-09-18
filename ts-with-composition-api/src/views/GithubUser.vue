@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
+import type { Ref } from "vue";
 import axios from "axios";
+import type { GithubUser, GithubRepo } from "./types";
 
 const props = defineProps({
   username: {
@@ -10,8 +12,8 @@ const props = defineProps({
   },
 });
 
-const result = ref(null);
-const repos = ref(null);
+const user: Ref<GithubUser | null> = ref(null);
+const repos: Ref<GithubRepo[] | null> = ref(null);
 const http = axios.create({
   baseURL: "https://api.github.com",
   headers: {
@@ -23,11 +25,17 @@ const router = useRouter();
 onMounted(async () => {
   // https://docs.github.com/en/rest/users/users#get-a-user
   const res = await http.get(`/users/${props.username}`);
-  result.value = res.data;
+  user.value = res.data;
 
-  const reposResponse = await http.get(result.value.repos_url);
-  repos.value = reposResponse.data;
+  if (user.value) {
+    const reposResponse = await http.get(user.value.repos_url);
+    repos.value = reposResponse.data;
+  }
 });
+
+const onClickRepo = (repo: GithubRepo) => {
+  window.open(repo.html_url);
+};
 
 const goBack = () => {
   router.push({ name: "users" });
@@ -44,19 +52,19 @@ const goBack = () => {
         Go back
       </button>
       <div
-        v-if="result"
+        v-if="user"
         class="py-8 px-8 max-w-sm mx-auto bg-zinc-700 rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6"
       >
         <img
           class="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0"
-          :src="`${result.avatar_url}`"
+          :src="`${user.avatar_url}`"
         />
         <div class="text-center space-y-2 sm:text-left">
           <div class="space-y-0.5">
             <p class="text-lg text-slate-200 font-semibold">
-              {{ result.name }}
+              {{ user.name }}
             </p>
-            <p class="text-slate-400 font-medium">{{ result.login }}</p>
+            <p class="text-slate-400 font-medium">{{ user.login }}</p>
           </div>
         </div>
       </div>
@@ -64,7 +72,8 @@ const goBack = () => {
 
     <div v-for="repo in repos" :key="repo.full_name">
       <div
-        class="py-8 px-8 max-w-sm mx-auto bg-white rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6 mb-3"
+        class="py-8 px-8 max-w-sm mx-auto bg-white rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6 mb-3 cursor-pointer"
+        @click="onClickRepo(repo)"
       >
         <div class="text-center space-y-2 sm:text-left">
           <div class="space-y-0.5">
