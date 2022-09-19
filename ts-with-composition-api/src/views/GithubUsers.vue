@@ -44,7 +44,7 @@ const onClickMore = (username: string) => {
       autofocus
     />
     <button
-      class="mb-12 green go-back-hover px-4 py-1 text-sm font-semibold rounded-full border border-purple-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+      class="mb-12 green go-back-hover px-4 py-1 text-sm font-semibold rounded-full border border-emerald-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
       @click="onClick"
     >
       Search
@@ -80,7 +80,7 @@ const onClickMore = (username: string) => {
                 </div>
                 <button
                   @click.stop="onClickMore(user.login)"
-                  class="green go-back-hover mt-2 px-4 py-1 text-sm font-semibold rounded-full border border-purple-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+                  class="green go-back-hover mt-2 px-4 py-1 text-sm font-semibold rounded-full border border-emerald-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
                 >
                   More...
                 </button>

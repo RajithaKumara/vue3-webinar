@@ -51,7 +51,7 @@ export default defineComponent({
   <div>
     <div class="my-12">
       <button
-        class="green go-back-hover px-4 py-1 text-sm font-semibold rounded-full border border-purple-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+        class="green go-back-hover px-4 py-1 text-sm font-semibold rounded-full border border-emerald-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
         @click="goBack"
       >
         Go back
