@@ -18,12 +18,19 @@ import HelloWorld from "./components/HelloWorld.vue";
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/users">Users</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </div>
   </header>
 
-  <RouterView />
+  <RouterView v-slot="{ Component, route }">
+    <Transition name="fade">
+      <KeepAlive>
+        <component :is="Component" :key="route.path" />
+      </KeepAlive>
+    </Transition>
+  </RouterView>
 </template>
 
 <style src="./style.css" lang="css"></style>
