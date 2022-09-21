@@ -1,6 +1,21 @@
 <script setup lang="ts">
+import { ref, provide } from "vue";
 import { RouterLink, RouterView } from "vue-router";
 import HelloWorld from "./components/HelloWorld.vue";
+import DateFormatSelector from "./components/DateFormatSelector.vue";
+
+const dateFormatOptions = ref<Intl.DateTimeFormatOptions>({
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const updateDateFormatOptions = (options: Intl.DateTimeFormatOptions) => {
+  dateFormatOptions.value = options;
+};
+
+provide("dateFormatOptions", { dateFormatOptions, updateDateFormatOptions });
 </script>
 
 <template>
@@ -20,7 +35,10 @@ import HelloWorld from "./components/HelloWorld.vue";
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/users">Users</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/composable-demo">Composable Demo</RouterLink>
       </nav>
+
+      <DateFormatSelector />
     </div>
   </header>
 
