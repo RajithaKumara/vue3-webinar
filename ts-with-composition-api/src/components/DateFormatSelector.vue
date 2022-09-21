@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { inject } from "vue";
-import type { Ref } from "vue";
+import type { DateFormatOptions } from "../composables/useDateFormat";
 
-const dateFormatOptions = inject<{
-  dateFormatOptions: Ref<Intl.DateTimeFormatOptions>;
-  updateDateFormatOptions: (options: Intl.DateTimeFormatOptions) => void;
-}>("dateFormatOptions");
+const dateFormatOptions = inject<DateFormatOptions>("dateFormatOptions");
 
 interface DateTimeFormatOptions extends Intl.DateTimeFormatOptions {
   title: string;

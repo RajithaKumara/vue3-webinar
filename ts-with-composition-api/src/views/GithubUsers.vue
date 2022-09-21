@@ -1,33 +1,32 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import useGithubRestClient from "../composables/useGithubRestClient";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import type { Ref } from "vue";
-import axios from "axios";
 import type { GithubUser } from "./types";
 
 const name: Ref<string> = ref("");
-const users: Ref<GithubUser[]> = ref([]);
-const http = axios.create({
-  baseURL: "https://api.github.com",
-  headers: {
-    accept: "application/vnd.github.v3+json",
-  },
-});
-const router = useRouter();
 
-const onClick = async () => {
-  users.value = [];
-  // https://docs.github.com/en/rest/users/users#list-users
-  const res = await http.get("/search/users", {
-    params: { per_page: 100, q: name.value },
-  });
-  users.value = res.data.items;
+// https://docs.github.com/en/rest/users/users#list-users
+const {
+  loading,
+  data: users,
+  doGet,
+} = useGithubRestClient<{ items: GithubUser[] }>("/search/users");
+
+const searchUsers = () => {
+  if (users.value) {
+    users.value.items = [];
+  }
+  doGet({ params: { per_page: 100, q: name.value } });
 };
 
 const onClickProfile = (user: GithubUser) => {
   window.open(user.html_url);
 };
 
+const router = useRouter();
 const onClickMore = (username: string) => {
   router.push({ name: "user", params: { username } });
 };
@@ -42,15 +41,19 @@ const onClickMore = (username: string) => {
       aria-label="Filter projects"
       placeholder="Search GitHub Users..."
       autofocus
+      @keyup.enter="searchUsers"
     />
     <button
       class="mb-12 green go-back-hover px-4 py-1 text-sm font-semibold rounded-full border border-emerald-200 hover:text-white hover:border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
-      @click="onClick"
+      @click="searchUsers"
     >
       Search
     </button>
 
-    <div v-for="user in users" :key="user.id">
+    <div class="m-6 flex justify-center">
+      <LoadingSpinner v-if="loading" />
+    </div>
+    <div v-for="user in users?.items" :key="user.id">
       <div class="mt-4 -mb-3 cursor-pointer" @click="onClickProfile(user)">
         <div
           class="not-prose relative rounded-xl overflow-hidden bg-slate-800/25"

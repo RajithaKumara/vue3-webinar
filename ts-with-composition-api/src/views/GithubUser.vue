@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { onMounted, ref } from "vue";
-import type { Ref } from "vue";
-import axios from "axios";
+import { onMounted, ref, watch } from "vue";
+import useGithubRestClient from "../composables/useGithubRestClient";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import type { GithubUser, GithubRepo } from "./types";
 
 const props = defineProps({
@@ -12,24 +12,28 @@ const props = defineProps({
   },
 });
 
-const user: Ref<GithubUser | null> = ref(null);
-const repos: Ref<GithubRepo[] | null> = ref(null);
-const http = axios.create({
-  baseURL: "https://api.github.com",
-  headers: {
-    accept: "application/vnd.github.v3+json",
-  },
+// https://docs.github.com/en/rest/users/users#get-a-user
+const {
+  loading: loadingUsers,
+  data: user,
+  doGet: getUsers,
+} = useGithubRestClient<GithubUser>(`/users/${props.username}`);
+
+onMounted(() => {
+  getUsers();
 });
-const router = useRouter();
 
-onMounted(async () => {
-  // https://docs.github.com/en/rest/users/users#get-a-user
-  const res = await http.get(`/users/${props.username}`);
-  user.value = res.data;
+const reposUrl = ref<string | undefined>();
+const {
+  loading: loadingRepos,
+  data: repos,
+  doGet: getRepos,
+} = useGithubRestClient<GithubRepo[]>(reposUrl, { defaultLoading: true });
 
-  if (user.value) {
-    const reposResponse = await http.get(user.value.repos_url);
-    repos.value = reposResponse.data;
+watch(user, () => {
+  if (user.value?.repos_url) {
+    reposUrl.value = user.value.repos_url;
+    getRepos();
   }
 });
 
@@ -37,6 +41,7 @@ const onClickRepo = (repo: GithubRepo) => {
   window.open(repo.html_url);
 };
 
+const router = useRouter();
 const goBack = () => {
   router.push({ name: "users" });
 };
@@ -51,6 +56,9 @@ const goBack = () => {
       >
         Go back
       </button>
+      <div class="m-6 flex justify-center">
+        <LoadingSpinner v-if="loadingUsers" />
+      </div>
       <div
         v-if="user"
         class="py-8 px-8 max-w-sm mx-auto bg-zinc-700 rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6"
@@ -70,6 +78,9 @@ const goBack = () => {
       </div>
     </div>
 
+    <div class="m-6 flex justify-center">
+      <LoadingSpinner v-if="loadingRepos" />
+    </div>
     <div v-for="repo in repos" :key="repo.full_name">
       <div
         class="py-8 px-8 max-w-sm mx-auto bg-white rounded-xl shadow-lg space-y-2 sm:py-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-6 mb-3 cursor-pointer"
